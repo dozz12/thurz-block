@@ -21,13 +21,30 @@ function createMatrix(w, h) {
 }
 
 function createPiece(type) {
-  if (type === 'T') return [[0, 0, 0], [1, 1, 1], [0, 1, 0]];
-  if (type === 'O') return [[2, 2], [2, 2]];
-  if (type === 'L') return [[0, 3, 0], [0, 3, 0], [0, 3, 3]];
-  if (type === 'J') return [[0, 4, 0], [0, 4, 0], [4, 4, 0]];
-  if (type === 'I') return [[0, 5, 0, 0], [0, 5, 0, 0], [0, 5, 0, 0], [0, 5, 0, 0]];
-  if (type === 'S') return [[0, 6, 6], [6, 6, 0], [0, 0, 0]];
-  if (type === 'Z') return [[7, 7, 0], [0, 7, 7], [0, 0, 0]];
+  switch (type) {
+    case 'T':
+      return [[0, 0, 0], [1, 1, 1], [0, 1, 0]];
+    case 'O':
+      return [[2, 2], [2, 2]];
+    case 'L':
+      return [[0, 3, 0], [0, 3, 0], [0, 3, 3]];
+    case 'J':
+      return [[0, 4, 0], [0, 4, 0], [4, 4, 0]];
+    case 'I':
+      return [[0, 5, 0, 0], [0, 5, 0, 0], [0, 5, 0, 0], [0, 5, 0, 0]];
+    case 'S':
+      return [[0, 6, 6], [6, 6, 0], [0, 0, 0]];
+    case 'Z':
+      return [[7, 7, 0], [0, 7, 7], [0, 0, 0]];
+    case 'U':
+      return [[8, 0, 8], [8, 8, 8]];
+    case 'P':
+      return [[9, 9], [9, 9], [9, 0]];
+    case 'X':
+      return [[0, 10, 0], [10, 10, 10], [0, 10, 0]];
+    default:
+      return [[1]];
+  }
 }
 
 function drawMatrix(matrix, offset) {
@@ -42,7 +59,19 @@ function drawMatrix(matrix, offset) {
 }
 
 function getColor(value) {
-  return ['#000', '#FF0D72', '#0DC2FF', '#0DFF72', '#F538FF', '#FF8E0D', '#FFE138', '#3877FF'][value];
+  return [
+    '#000000', // 0 - kosong
+    '#FF0D72', // 1 - T
+    '#0DC2FF', // 2 - O
+    '#0DFF72', // 3 - L
+    '#F538FF', // 4 - J
+    '#FF8E0D', // 5 - I
+    '#FFE138', // 6 - S
+    '#3877FF', // 7 - Z
+    '#00FFA3', // 8 - U
+    '#FF66C4', // 9 - P
+    '#AA00FF'  // 10 - X
+  ][value];
 }
 
 function draw() {
@@ -96,7 +125,7 @@ function playerMove(dir) {
 }
 
 function playerReset() {
-  const pieces = 'TJLOSZI';
+  const pieces = 'TJLOSZIUPX'; // Include varian baru
   player.matrix = createPiece(pieces[Math.floor(Math.random() * pieces.length)]);
   player.pos.y = 0;
   player.pos.x = Math.floor(arena[0].length / 2) - Math.floor(player.matrix[0].length / 2);
