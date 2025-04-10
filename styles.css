@@ -19,10 +19,47 @@ body {
   margin-bottom: 10px;
 }
 
-canvas {
-  border: 4px solid #0ff;
+#game-container {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+#grid {
+  display: grid;
+  grid-template-rows: repeat(10, 30px);
+  grid-template-columns: repeat(10, 30px);
+  gap: 2px;
   background-color: #111;
+  padding: 5px;
+  border: 4px solid #0ff;
   box-shadow: 0 0 20px #0ff;
+}
+
+.cell {
+  width: 30px;
+  height: 30px;
+  background-color: #222;
+}
+
+#next-blocks {
+  margin-left: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.next-block {
+  display: grid;
+  grid-template-rows: repeat(4, 20px);
+  grid-template-columns: repeat(4, 20px);
+  gap: 2px;
+  margin-bottom: 10px;
+}
+
+.next-cell {
+  width: 20px;
+  height: 20px;
+  background-color: #222;
 }
 
 .score-board {
@@ -30,11 +67,16 @@ canvas {
   font-size: 1.5rem;
 }
 
-canvas.flash {
-  animation: flash 0.2s ease-in-out;
+#rotate-btn {
+  margin-top: 10px;
+  padding: 10px 20px;
+  font-size: 1rem;
+  background-color: #0ff;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
 }
 
-@keyframes flash {
-  0% { box-shadow: 0 0 20px #fff; }
-  100% { box-shadow: 0 0 20px #0ff; }
+#rotate-btn:hover {
+  background-color: #00cccc;
 }
