@@ -1,90 +1,74 @@
-body {
-  background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
-  font-family: 'Segoe UI', sans-serif;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  color: white;
+* {
+  box-sizing: border-box;
   margin: 0;
-  flex-direction: column;
+  padding: 0;
 }
 
-.container {
-  text-align: center;
-  padding: 10px;
+body {
+  background-color: #000;
+  color: #fff;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  min-height: 100vh;
+  padding: 20px;
 }
 
 h1 {
-  font-size: 2.5em;
   margin-bottom: 10px;
-  text-shadow: 2px 2px #000;
+  font-size: 2em;
+  color: #0DC2FF;
+  text-shadow: 0 0 10px #0DC2FF;
 }
 
 canvas {
+  border: 3px solid #0DC2FF;
   background: #111;
-  box-shadow: 0 0 20px rgba(0, 255, 255, 0.8);
-  border-radius: 8px;
-  margin-top: 10px;
-  max-width: 100%;
+  width: 100%;
+  max-width: 320px;
   height: auto;
+  touch-action: none;
 }
 
-.info {
+#score {
   margin-top: 15px;
-  font-size: 1.2em;
+  font-size: 1.5em;
+  color: #fff;
+  font-weight: bold;
 }
 
-button {
-  margin-top: 10px;
-  padding: 10px 20px;
-  font-size: 1em;
-  border: none;
-  background: #00c6ff;
-  color: white;
-  cursor: pointer;
-  border-radius: 5px;
-  transition: background 0.3s;
-}
-
-button:hover {
-  background: #0072ff;
-}
-
-.controls {
-  margin-top: 15px;
+#mobile-controls {
   display: none;
+  margin-top: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
 }
 
-@media (max-width: 600px) {
-  canvas {
-    width: 100%;
-    height: auto;
-  }
+#mobile-controls button {
+  font-size: 24px;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  background-color: #0DC2FF;
+  color: #000;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 4px #055c73;
+  transition: 0.1s;
+}
 
-  h1 {
-    font-size: 2em;
-  }
+#mobile-controls button:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px #055c73;
+}
 
-  .controls {
-    display: flex;
-    justify-content: space-around;
-    flex-wrap: wrap;
-  }
-
-  .controls button {
-    background: #00c6ff;
-    border: none;
-    padding: 15px 20px;
-    font-size: 1.5em;
-    margin: 5px;
-    border-radius: 8px;
-    color: white;
-    flex: 1 1 40%;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-  }
-
-  .controls button:active {
-    background: #0072ff;
-  }
+.footer {
+  margin-top: auto;
+  font-size: 0.9em;
+  color: #666;
+  padding-top: 20px;
 }
