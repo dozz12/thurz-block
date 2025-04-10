@@ -1,20 +1,17 @@
 document.addEventListener('DOMContentLoaded', () => {
   const grid = document.getElementById('grid');
-  const nextBlocksContainer = document.getElementById('next-blocks');
   const scoreDisplay = document.getElementById('score');
   const gridSize = 10;
   let score = 0;
-  let draggedBlock = null;
-  let ghostBlock = null;
-  let shakeTimeout = null;
+  let currentBlock = null;
+  let currentX = 0;
+  let currentY = 0;
 
   function createGrid() {
     for (let i = 0; i < gridSize * gridSize; i++) {
       const cell = document.createElement('div');
       cell.classList.add('cell');
       cell.dataset.index = i;
-      cell.addEventListener('dragover', e => e.preventDefault());
-      cell.addEventListener('drop', handleDrop);
       grid.appendChild(cell);
     }
   }
@@ -39,132 +36,52 @@ document.addEventListener('DOMContentLoaded', () => {
     return { shape: shapes[index], color: colors[index] };
   }
 
-  function createNextBlocks() {
-    nextBlocksContainer.innerHTML = '';
-    for (let i = 0; i < 3; i++) {
-      const block = generateBlock();
-      const blockElement = document.createElement('div');
-      blockElement.classList.add('next-block');
-      blockElement.setAttribute('draggable', 'true');
-      blockElement.dataset.blockIndex = i;
-
-      blockElement.addEventListener('dragstart', e => {
-        draggedBlock = block;
-        createGhost(block, e.pageX, e.pageY);
-        e.dataTransfer.setDragImage(new Image(), 0, 0);
-      });
-
-      blockElement.addEventListener('dragend', () => {
-        removeGhost();
-      });
-
-      for (let i = 0; i < 16; i++) {
-        const cell = document.createElement('div');
-        cell.classList.add('next-cell');
-        if (block.shape[Math.floor(i / 4)] && block.shape[Math.floor(i / 4)][i % 4]) {
-          cell.style.backgroundColor = block.color;
-        }
-        blockElement.appendChild(cell);
-      }
-
-      nextBlocksContainer.appendChild(blockElement);
-    }
-  }
-
-  function createGhost(block, x, y) {
-    ghostBlock = document.createElement('div');
-    ghostBlock.classList.add('ghost-block');
-    ghostBlock.style.left = `${x}px`;
-    ghostBlock.style.top = `${y}px`;
-    ghostBlock.style.position = 'absolute';
-    ghostBlock.style.pointerEvents = 'none';
-    ghostBlock.style.opacity = 0.8;
-    ghostBlock.style.transform = 'scale(1.05)';
-
-    for (let i = 0; i < 16; i++) {
-      const cell = document.createElement('div');
-      cell.classList.add('next-cell');
-      if (block.shape[Math.floor(i / 4)] && block.shape[Math.floor(i / 4)][i % 4]) {
-        cell.style.backgroundColor = block.color;
-        cell.style.boxShadow = '0 0 5px rgba(0,0,0,0.5)';
-      }
-      ghostBlock.appendChild(cell);
-    }
-    document.body.appendChild(ghostBlock);
-  }
-
-  function moveGhost(e) {
-    if (ghostBlock) {
-      ghostBlock.style.left = `${e.pageX - 60}px`;
-      ghostBlock.style.top = `${e.pageY - 60}px`;
-    }
-  }
-
-  function removeGhost() {
-    if (ghostBlock) {
-      ghostBlock.remove();
-      ghostBlock = null;
-    }
-  }
-
-  document.addEventListener('dragover', moveGhost);
-
-  function placeBlock(block, x, y) {
-    const shape = block.shape;
-    const toFill = [];
-
+  function drawBlock() {
+    removeBlock();
+    const shape = currentBlock.shape;
     for (let i = 0; i < shape.length; i++) {
       for (let j = 0; j < shape[i].length; j++) {
         if (shape[i][j]) {
-          const cellX = x + j;
-          const cellY = y + i;
-          if (cellX >= gridSize || cellY >= gridSize) return false;
-          const cellIndex = cellY * gridSize + cellX;
-          const cell = grid.children[cellIndex];
-          if (!cell || cell.style.backgroundColor) return false;
-          toFill.push(cell);
+          const x = currentX + j;
+          const y = currentY + i;
+          const index = y * gridSize + x;
+          if (index >= 0 && index < gridSize * gridSize) {
+            const cell = grid.children[index];
+            cell.style.backgroundColor = currentBlock.color;
+            cell.classList.add('temp');
+          }
         }
       }
     }
-
-    toFill.forEach(cell => {
-      cell.style.backgroundColor = block.color;
-      cell.classList.add('placed');
-      cell.style.transition = 'transform 0.2s';
-      cell.style.transform = 'scale(1.2)';
-      setTimeout(() => {
-        cell.style.transform = 'scale(1)';
-      }, 200);
-    });
-
-    checkFullLines();
-    score += 10;
-    scoreDisplay.textContent = score;
-    return true;
   }
 
-  function handleDrop(e) {
-    const targetIndex = parseInt(e.target.dataset.index);
-    const x = targetIndex % gridSize;
-    const y = Math.floor(targetIndex / gridSize);
+  function removeBlock() {
+    document.querySelectorAll('.temp').forEach(cell => {
+      cell.style.backgroundColor = '';
+      cell.classList.remove('temp');
+    });
+  }
 
-    if (draggedBlock) {
-      const placed = placeBlock(draggedBlock, x, y);
-      if (placed) {
-        createNextBlocks();
-      } else {
-        triggerShake();
+  function placeBlock() {
+    const shape = currentBlock.shape;
+    for (let i = 0; i < shape.length; i++) {
+      for (let j = 0; j < shape[i].length; j++) {
+        if (shape[i][j]) {
+          const x = currentX + j;
+          const y = currentY + i;
+          const index = y * gridSize + x;
+          if (index >= 0 && index < gridSize * gridSize) {
+            const cell = grid.children[index];
+            cell.style.backgroundColor = currentBlock.color;
+            cell.classList.add('placed');
+          }
+        }
       }
     }
-  }
-
-  function triggerShake() {
-    if (shakeTimeout) return;
-    grid.classList.add('shake');
-    shakeTimeout = setTimeout(() => {
-      grid.classList.remove('shake');
-      shakeTimeout = null;
-    }, 400);
+    score += 10;
+    scoreDisplay.textContent = score;
+    checkFullLines();
+    spawnNewBlock();
   }
 
   function checkFullLines() {
@@ -172,7 +89,7 @@ document.addEventListener('DOMContentLoaded', () => {
       let full = true;
       for (let c = 0; c < gridSize; c++) {
         const cell = grid.children[r * gridSize + c];
-        if (!cell.style.backgroundColor) {
+        if (!cell.classList.contains('placed')) {
           full = false;
           break;
         }
@@ -180,33 +97,75 @@ document.addEventListener('DOMContentLoaded', () => {
       if (full) {
         for (let c = 0; c < gridSize; c++) {
           const cell = grid.children[r * gridSize + c];
+          cell.classList.remove('placed');
           cell.style.backgroundColor = '';
         }
         score += 50;
       }
     }
-
-    for (let c = 0; c < gridSize; c++) {
-      let full = true;
-      for (let r = 0; r < gridSize; r++) {
-        const cell = grid.children[r * gridSize + c];
-        if (!cell.style.backgroundColor) {
-          full = false;
-          break;
-        }
-      }
-      if (full) {
-        for (let r = 0; r < gridSize; r++) {
-          const cell = grid.children[r * gridSize + c];
-          cell.style.backgroundColor = '';
-        }
-        score += 50;
-      }
-    }
-
     scoreDisplay.textContent = score;
   }
 
+  function canMove(dx) {
+    const shape = currentBlock.shape;
+    for (let i = 0; i < shape.length; i++) {
+      for (let j = 0; j < shape[i].length; j++) {
+        if (shape[i][j]) {
+          const x = currentX + dx + j;
+          const y = currentY + i;
+          if (x < 0 || x >= gridSize || y >= gridSize) return false;
+          const index = y * gridSize + x;
+          if (grid.children[index].classList.contains('placed')) return false;
+        }
+      }
+    }
+    return true;
+  }
+
+  function spawnNewBlock() {
+    currentBlock = generateBlock();
+    currentX = 3;
+    currentY = 0;
+    drawBlock();
+  }
+
+  function dropBlock() {
+    while (canMoveDown()) {
+      currentY++;
+    }
+    drawBlock();
+    placeBlock();
+  }
+
+  function canMoveDown() {
+    const shape = currentBlock.shape;
+    for (let i = 0; i < shape.length; i++) {
+      for (let j = 0; j < shape[i].length; j++) {
+        if (shape[i][j]) {
+          const x = currentX + j;
+          const y = currentY + i + 1;
+          if (y >= gridSize) return false;
+          const index = y * gridSize + x;
+          if (grid.children[index].classList.contains('placed')) return false;
+        }
+      }
+    }
+    return true;
+  }
+
+  document.addEventListener('keydown', e => {
+    if (!currentBlock) return;
+    if (e.key === 'ArrowLeft' && canMove(-1)) {
+      currentX--;
+      drawBlock();
+    } else if (e.key === 'ArrowRight' && canMove(1)) {
+      currentX++;
+      drawBlock();
+    } else if (e.key === 'ArrowDown') {
+      dropBlock();
+    }
+  });
+
   createGrid();
-  createNextBlocks();
+  spawnNewBlock();
 });
