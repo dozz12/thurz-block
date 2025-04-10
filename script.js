@@ -2,17 +2,21 @@ const canvas = document.getElementById('tetris');
 const context = canvas.getContext('2d');
 context.scale(20, 20);
 
-let dropCounter = 0;
-let dropInterval = 1000;
-let lastTime = 0;
-let score = 0;
-
-const arena = createMatrix(12, 20);
+// Lebarin arena jadi 14x24
+const arena = createMatrix(14, 24);
 const player = {
   pos: { x: 0, y: 0 },
   matrix: null,
   score: 0,
 };
+
+let dropCounter = 0;
+let dropInterval = 1000;
+let lastTime = 0;
+
+// Buat animasi flash
+let flashRows = [];
+let flashTime = 0;
 
 function createMatrix(w, h) {
   const matrix = [];
@@ -42,6 +46,8 @@ function createPiece(type) {
       return [[9, 9], [9, 9], [9, 0]];
     case 'X':
       return [[0, 10, 0], [10, 10, 10], [0, 10, 0]];
+    case 'B': // Blok 3x3 super
+      return [[11, 11, 11], [11, 11, 11], [11, 11, 11]];
     default:
       return [[1]];
   }
@@ -70,22 +76,46 @@ function getColor(value) {
     '#3877FF', // 7 - Z
     '#00FFA3', // 8 - U
     '#FF66C4', // 9 - P
-    '#AA00FF'  // 10 - X
+    '#AA00FF', // 10 - X
+    '#FF3CAC'  // 11 - B (Big block)
   ][value];
 }
 
 function draw() {
   context.fillStyle = '#111';
   context.fillRect(0, 0, canvas.width, canvas.height);
+
   drawMatrix(arena, { x: 0, y: 0 });
   drawMatrix(player.matrix, player.pos);
+
+  // Flash effect
+  if (flashTime > 0) {
+    flashRows.forEach(y => {
+      context.fillStyle = 'rgba(255, 255, 255, 0.5)';
+      context.fillRect(0, y, arena[0].length, 1);
+    });
+    flashTime -= 16;
+    if (flashTime <= 0) flashRows = [];
+  }
 }
 
 function merge(arena, player) {
   player.matrix.forEach((row, y) => {
     row.forEach((value, x) => {
       if (value) {
-        arena[y + player.pos.y][x + player.pos.x] = value;
+        const realY = y + player.pos.y;
+        const realX = x + player.pos.x;
+
+        if (value === 11) {
+          // Super block: hancurkan baris walau gak full
+          if (arena[realY]) {
+            arena[realY] = new Array(arena[0].length).fill(0);
+            flashRows.push(realY);
+            flashTime = 200;
+          }
+        } else {
+          arena[realY][realX] = value;
+        }
       }
     });
   });
@@ -125,7 +155,7 @@ function playerMove(dir) {
 }
 
 function playerReset() {
-  const pieces = 'TJLOSZIUPX'; // Include varian baru
+  const pieces = 'TJLOSZIUPXB'; // Tambah B untuk super block
   player.matrix = createPiece(pieces[Math.floor(Math.random() * pieces.length)]);
   player.pos.y = 0;
   player.pos.x = Math.floor(arena[0].length / 2) - Math.floor(player.matrix[0].length / 2);
@@ -157,11 +187,8 @@ function rotate(matrix, dir) {
       [matrix[x][y], matrix[y][x]] = [matrix[y][x], matrix[x][y]];
     }
   }
-  if (dir > 0) {
-    matrix.forEach(row => row.reverse());
-  } else {
-    matrix.reverse();
-  }
+  if (dir > 0) matrix.forEach(row => row.reverse());
+  else matrix.reverse();
 }
 
 function arenaSweep() {
@@ -170,16 +197,18 @@ function arenaSweep() {
     for (let x = 0; x < arena[y].length; ++x) {
       if (arena[y][x] === 0) continue outer;
     }
+    flashRows.push(y);
     const row = arena.splice(y, 1)[0].fill(0);
     arena.unshift(row);
     ++y;
-    score += rowCount * 10;
+    player.score += rowCount * 10;
     rowCount *= 2;
+    flashTime = 200;
   }
 }
 
 function updateScore() {
-  document.getElementById('score').innerText = score;
+  document.getElementById('score').innerText = player.score;
 }
 
 function update(time = 0) {
