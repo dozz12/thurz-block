@@ -4,62 +4,22 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>ThurZ Block</title>
-  <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    body {
-      background-color: #000;
-      color: #fff;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
-      min-height: 100vh;
-      padding: 20px;
-    }
-
-    h1 {
-      margin-bottom: 10px;
-      font-size: 2em;
-      color: #0DC2FF;
-      text-shadow: 0 0 10px #0DC2FF;
-    }
-
-    canvas {
-      border: 3px solid #0DC2FF;
-      background: #111;
-      width: 100%;
-      max-width: 320px; /* 16 * 20px */
-      height: auto;
-      touch-action: none;
-    }
-
-    #score {
-      margin-top: 15px;
-      font-size: 1.5em;
-      color: #fff;
-      font-weight: bold;
-    }
-
-    .footer {
-      margin-top: auto;
-      font-size: 0.9em;
-      color: #666;
-      padding-top: 20px;
-    }
-  </style>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <h1>ThurZ Block</h1>
   <canvas id="tetris" width="320" height="560"></canvas>
   <div id="score">0</div>
-  <div class="footer">👾 Made with ❤️ by ThurZ</div>
 
+  <div id="mobile-controls">
+    <button id="left">⬅️</button>
+    <button id="rotate">🔄</button>
+    <button id="right">➡️</button>
+    <button id="down">⬇️</button>
+  </div>
+
+  <div class="footer">👾 Made with ❤️ by ThurZ</div>
   <script src="script.js"></script>
 </body>
 </html>
+
