@@ -4,8 +4,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const scoreDisplay = document.getElementById('score');
   const gridSize = 10;
   let score = 0;
-  let nextBlocks = [];
   let draggedBlock = null;
+  let ghostBlock = null;
 
   function createGrid() {
     for (let i = 0; i < gridSize * gridSize; i++) {
@@ -16,30 +16,6 @@ document.addEventListener('DOMContentLoaded', () => {
       cell.addEventListener('drop', handleDrop);
       grid.appendChild(cell);
     }
-  }
-
-  function createNextBlocks() {
-    nextBlocksContainer.innerHTML = '';
-    nextBlocks = [generateBlock(), generateBlock(), generateBlock()];
-    nextBlocks.forEach((block, index) => {
-      const blockElement = document.createElement('div');
-      blockElement.classList.add('next-block');
-      blockElement.setAttribute('draggable', 'true');
-      blockElement.dataset.blockIndex = index;
-      blockElement.addEventListener('dragstart', () => {
-        draggedBlock = block;
-      });
-
-      for (let i = 0; i < 16; i++) {
-        const cell = document.createElement('div');
-        cell.classList.add('next-cell');
-        if (block.shape[Math.floor(i / 4)] && block.shape[Math.floor(i / 4)][i % 4]) {
-          cell.style.backgroundColor = block.color;
-        }
-        blockElement.appendChild(cell);
-      }
-      nextBlocksContainer.appendChild(blockElement);
-    });
   }
 
   function generateBlock() {
@@ -62,19 +38,84 @@ document.addEventListener('DOMContentLoaded', () => {
     return { shape: shapes[index], color: colors[index] };
   }
 
+  function createNextBlocks() {
+    nextBlocksContainer.innerHTML = '';
+    for (let i = 0; i < 3; i++) {
+      const block = generateBlock();
+      const blockElement = document.createElement('div');
+      blockElement.classList.add('next-block');
+      blockElement.setAttribute('draggable', 'true');
+      blockElement.dataset.blockIndex = i;
+
+      blockElement.addEventListener('dragstart', e => {
+        draggedBlock = block;
+        createGhost(block, e.pageX, e.pageY);
+      });
+
+      blockElement.addEventListener('dragend', () => {
+        removeGhost();
+      });
+
+      for (let i = 0; i < 16; i++) {
+        const cell = document.createElement('div');
+        cell.classList.add('next-cell');
+        if (block.shape[Math.floor(i / 4)] && block.shape[Math.floor(i / 4)][i % 4]) {
+          cell.style.backgroundColor = block.color;
+        }
+        blockElement.appendChild(cell);
+      }
+
+      nextBlocksContainer.appendChild(blockElement);
+    }
+  }
+
+  function createGhost(block, x, y) {
+    ghostBlock = document.createElement('div');
+    ghostBlock.classList.add('ghost-block');
+    ghostBlock.style.left = `${x}px`;
+    ghostBlock.style.top = `${y}px`;
+    ghostBlock.style.position = 'absolute';
+
+    for (let i = 0; i < 16; i++) {
+      const cell = document.createElement('div');
+      cell.classList.add('next-cell');
+      if (block.shape[Math.floor(i / 4)] && block.shape[Math.floor(i / 4)][i % 4]) {
+        cell.style.backgroundColor = block.color;
+      }
+      ghostBlock.appendChild(cell);
+    }
+    document.body.appendChild(ghostBlock);
+  }
+
+  function moveGhost(e) {
+    if (ghostBlock) {
+      ghostBlock.style.left = `${e.pageX - 60}px`;
+      ghostBlock.style.top = `${e.pageY - 60}px`;
+    }
+  }
+
+  function removeGhost() {
+    if (ghostBlock) {
+      ghostBlock.remove();
+      ghostBlock = null;
+    }
+  }
+
+  document.addEventListener('dragover', moveGhost);
+
   function placeBlock(block, x, y) {
     const shape = block.shape;
+
     for (let i = 0; i < shape.length; i++) {
       for (let j = 0; j < shape[i].length; j++) {
         if (shape[i][j]) {
           const cellIndex = (y + i) * gridSize + (x + j);
           const cell = grid.children[cellIndex];
-          if (!cell || cell.style.backgroundColor) {
-            return false;
-          }
+          if (!cell || cell.style.backgroundColor) return false;
         }
       }
     }
+
     for (let i = 0; i < shape.length; i++) {
       for (let j = 0; j < shape[i].length; j++) {
         if (shape[i][j]) {
@@ -85,97 +126,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }
     }
-    checkAndClearLines();
-    setTimeout(checkGameOver, 100);
-    return true;
-  }
 
-  function checkAndClearLines() {
-    let fullRows = [];
-    let fullCols = [];
-
-    for (let i = 0; i < gridSize; i++) {
-      let rowFull = true;
-      let colFull = true;
-      for (let j = 0; j < gridSize; j++) {
-        if (!grid.children[i * gridSize + j].style.backgroundColor) rowFull = false;
-        if (!grid.children[j * gridSize + i].style.backgroundColor) colFull = false;
-      }
-      if (rowFull) fullRows.push(i);
-      if (colFull) fullCols.push(i);
-    }
-
-    fullRows.forEach(row => {
-      for (let i = 0; i < gridSize; i++) {
-        const cell = grid.children[row * gridSize + i];
-        cell.classList.add('clearing');
-      }
-    });
-    fullCols.forEach(col => {
-      for (let i = 0; i < gridSize; i++) {
-        const cell = grid.children[i * gridSize + col];
-        cell.classList.add('clearing');
-      }
-    });
-
-    setTimeout(() => {
-      fullRows.forEach(row => {
-        for (let i = 0; i < gridSize; i++) {
-          const cell = grid.children[row * gridSize + i];
-          cell.style.backgroundColor = '';
-          cell.classList.remove('placed', 'clearing');
-        }
-      });
-a
-      fullCols.forEach(col => {
-        for (let i = 0; i < gridSize; i++) {
-          const cell = grid.children[i * gridSize + col];
-          cell.style.backgroundColor = '';
-          cell.classList.remove('placed', 'clearing');
-        }
-      });
-
-      const linesCleared = fullRows.length + fullCols.length;
-      if (linesCleared > 0) {
-        score += linesCleared * 10;
-        scoreDisplay.textContent = score;
-      }
-    }, 200);
-  }
-
-  function checkGameOver() {
-    let possible = false;
-    for (const block of nextBlocks) {
-      for (let y = 0; y < gridSize; y++) {
-        for (let x = 0; x < gridSize; x++) {
-          if (canPlaceBlock(block, x, y)) {
-            possible = true;
-            break;
-          }
-        }
-        if (possible) break;
-      }
-      if (possible) break;
-    }
-    if (!possible) {
-      alert(`Game Over! Skormu: ${score}`);
-      location.reload();
-    }
-  }
-
-  function canPlaceBlock(block, x, y) {
-    const shape = block.shape;
-    for (let i = 0; i < shape.length; i++) {
-      for (let j = 0; j < shape[i].length; j++) {
-        if (shape[i][j]) {
-          const cellIndex = (y + i) * gridSize + (x + j);
-          const cell = grid.children[cellIndex];
-          if (!cell || cell.style.backgroundColor) {
-            return false;
-          }
-        }
-      }
-    }
+    checkFullLines();
+    score += 10;
+    scoreDisplay.textContent = score;
     return true;
   }
 
@@ -190,6 +144,48 @@ a
         createNextBlocks();
       }
     }
+  }
+
+  function checkFullLines() {
+    // Check rows
+    for (let r = 0; r < gridSize; r++) {
+      let full = true;
+      for (let c = 0; c < gridSize; c++) {
+        const cell = grid.children[r * gridSize + c];
+        if (!cell.style.backgroundColor) {
+          full = false;
+          break;
+        }
+      }
+      if (full) {
+        for (let c = 0; c < gridSize; c++) {
+          const cell = grid.children[r * gridSize + c];
+          cell.style.backgroundColor = '';
+        }
+        score += 50;
+      }
+    }
+
+    // Check columns
+    for (let c = 0; c < gridSize; c++) {
+      let full = true;
+      for (let r = 0; r < gridSize; r++) {
+        const cell = grid.children[r * gridSize + c];
+        if (!cell.style.backgroundColor) {
+          full = false;
+          break;
+        }
+      }
+      if (full) {
+        for (let r = 0; r < gridSize; r++) {
+          const cell = grid.children[r * gridSize + c];
+          cell.style.backgroundColor = '';
+        }
+        score += 50;
+      }
+    }
+
+    scoreDisplay.textContent = score;
   }
 
   createGrid();
