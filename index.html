@@ -4,13 +4,24 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>ThurZ Block</title>
-  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <h1>ThurZ Block</h1>
-  <div id="score-container">Score: <span id="score">0</span></div>
-  <div id="grid" class="grid"></div>
-
-  <script src="game.js"></script>
+  <div class="container">
+    <h1>ThurZ Block</h1>
+    <canvas id="tetris" width="240" height="400"></canvas>
+    <div class="info">
+      <div>Score: <span id="score">0</span></div>
+      <button onclick="startGame()">Start Game</button>
+    </div>
+    <div class="controls">
+      <button onclick="playerMove(-1)">◀️</button>
+      <button onclick="playerDrop()">🔽</button>
+      <button onclick="playerMove(1)">▶️</button>
+      <button onclick="playerRotate(1)">⟳</button>
+    </div>
+  </div>
+  <script src="script.js"></script>
 </body>
 </html>
+
