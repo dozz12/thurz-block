@@ -50,6 +50,7 @@ document.addEventListener('DOMContentLoaded', () => {
       blockElement.addEventListener('dragstart', e => {
         draggedBlock = block;
         createGhost(block, e.pageX, e.pageY);
+        e.dataTransfer.setDragImage(new Image(), 0, 0);
       });
 
       blockElement.addEventListener('dragend', () => {
@@ -147,7 +148,6 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function checkFullLines() {
-    // Check rows
     for (let r = 0; r < gridSize; r++) {
       let full = true;
       for (let c = 0; c < gridSize; c++) {
@@ -166,7 +166,6 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
 
-    // Check columns
     for (let c = 0; c < gridSize; c++) {
       let full = true;
       for (let r = 0; r < gridSize; r++) {
