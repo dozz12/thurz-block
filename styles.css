@@ -1,0 +1,22 @@
+body {
+  margin: 0;
+  font-family: 'Press Start 2P', cursive;
+  background: black;
+  color: #00ffcc;
+  text-align: center;
+}
+
+.landing .container {
+  padding-top: 10vh;
+}
+
+.play-button {
+  display: inline-block;
+  margin-top: 20px;
+  padding: 10px 20px;
+  background: #ff00cc;
+  color: white;
+  text-decoration: none;
+  border-radius: 8px;
+  font-size: 14px;
+}
