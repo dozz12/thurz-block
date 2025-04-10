@@ -1,16 +1,16 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>ThurZ Block</title>
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="styles.css" />
 </head>
-<body class="landing">
-  <div class="container">
-    <h1>🧱 THURZ BLOCK</h1>
-    <p>ThurZ Block adalah game puzzle seru di mana kamu harus menyusun balok agar tidak penuh. Uji strategi dan kecepatanmu!</p>
-    <a href="game.html" class="play-button">Mainkan Sekarang</a>
-  </div>
+<body>
+  <h1 class="title">ThurZ Block</h1>
+  <canvas id="game" width="300" height="600"></canvas>
+  <div class="score-board">Score: <span id="score">0</span></div>
+
+  <script src="game.js"></script>
 </body>
 </html>
