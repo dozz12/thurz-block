@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let score = 0;
   let draggedBlock = null;
   let ghostBlock = null;
+  let shakeTimeout = null;
 
   function createGrid() {
     for (let i = 0; i < gridSize * gridSize; i++) {
@@ -33,7 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
       [[1, 1, 0], [1, 0, 0], [1, 0, 0]],
       [[0, 0, 1], [0, 0, 1], [0, 1, 1]]
     ];
-    const colors = ['#f00', '#0f0', '#00f', '#ff0', '#f80', '#0ff', '#a0f', '#fff', '#faa', '#af5', '#55f', '#fa0'];
+    const colors = ['#f44336', '#4caf50', '#2196f3', '#ffeb3b', '#ff9800', '#00bcd4', '#9c27b0', '#ffffff', '#ffcdd2', '#cddc39', '#3f51b5', '#ff5722'];
     const index = Math.floor(Math.random() * shapes.length);
     return { shape: shapes[index], color: colors[index] };
   }
@@ -76,12 +77,16 @@ document.addEventListener('DOMContentLoaded', () => {
     ghostBlock.style.left = `${x}px`;
     ghostBlock.style.top = `${y}px`;
     ghostBlock.style.position = 'absolute';
+    ghostBlock.style.pointerEvents = 'none';
+    ghostBlock.style.opacity = 0.8;
+    ghostBlock.style.transform = 'scale(1.05)';
 
     for (let i = 0; i < 16; i++) {
       const cell = document.createElement('div');
       cell.classList.add('next-cell');
       if (block.shape[Math.floor(i / 4)] && block.shape[Math.floor(i / 4)][i % 4]) {
         cell.style.backgroundColor = block.color;
+        cell.style.boxShadow = '0 0 5px rgba(0,0,0,0.5)';
       }
       ghostBlock.appendChild(cell);
     }
@@ -106,33 +111,31 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function placeBlock(block, x, y) {
     const shape = block.shape;
+    const toFill = [];
 
     for (let i = 0; i < shape.length; i++) {
       for (let j = 0; j < shape[i].length; j++) {
         if (shape[i][j]) {
           const cellX = x + j;
           const cellY = y + i;
-
-          // Cek apakah keluar dari grid
           if (cellX >= gridSize || cellY >= gridSize) return false;
-
           const cellIndex = cellY * gridSize + cellX;
           const cell = grid.children[cellIndex];
           if (!cell || cell.style.backgroundColor) return false;
+          toFill.push(cell);
         }
       }
     }
 
-    for (let i = 0; i < shape.length; i++) {
-      for (let j = 0; j < shape[i].length; j++) {
-        if (shape[i][j]) {
-          const cellIndex = (y + i) * gridSize + (x + j);
-          const cell = grid.children[cellIndex];
-          cell.style.backgroundColor = block.color;
-          cell.classList.add('placed');
-        }
-      }
-    }
+    toFill.forEach(cell => {
+      cell.style.backgroundColor = block.color;
+      cell.classList.add('placed');
+      cell.style.transition = 'transform 0.2s';
+      cell.style.transform = 'scale(1.2)';
+      setTimeout(() => {
+        cell.style.transform = 'scale(1)';
+      }, 200);
+    });
 
     checkFullLines();
     score += 10;
@@ -149,8 +152,19 @@ document.addEventListener('DOMContentLoaded', () => {
       const placed = placeBlock(draggedBlock, x, y);
       if (placed) {
         createNextBlocks();
+      } else {
+        triggerShake();
       }
     }
+  }
+
+  function triggerShake() {
+    if (shakeTimeout) return;
+    grid.classList.add('shake');
+    shakeTimeout = setTimeout(() => {
+      grid.classList.remove('shake');
+      shakeTimeout = null;
+    }, 400);
   }
 
   function checkFullLines() {
