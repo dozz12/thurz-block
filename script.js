@@ -1,14 +1,13 @@
 const canvas = document.getElementById('tetris');
 const context = canvas.getContext('2d');
-context.scale(20, 20); // Setiap grid 20x20 px
+context.scale(20, 20);
 
+const arena = createMatrix(16, 28); // Grid diperbesar
 let dropCounter = 0;
 let dropInterval = 1000;
 let lastTime = 0;
 let score = 0;
 
-// Arena diperbesar jadi 16 kolom, 28 baris
-const arena = createMatrix(16, 28);
 const player = {
   pos: { x: 0, y: 0 },
   matrix: null,
@@ -23,29 +22,29 @@ function createMatrix(w, h) {
 
 function createPiece(type) {
   switch (type) {
-    case 'T': return [[0, 0, 0], [1, 1, 1], [0, 1, 0]];
-    case 'O': return [[2, 2], [2, 2]];
-    case 'L': return [[0, 3, 0], [0, 3, 0], [0, 3, 3]];
-    case 'J': return [[0, 4, 0], [0, 4, 0], [4, 4, 0]];
-    case 'I': return [[0, 5, 0, 0], [0, 5, 0, 0], [0, 5, 0, 0], [0, 5, 0, 0]];
-    case 'S': return [[0, 6, 6], [6, 6, 0], [0, 0, 0]];
-    case 'Z': return [[7, 7, 0], [0, 7, 7], [0, 0, 0]];
-    case 'U': return [[8, 0, 8], [8, 8, 8]];
-    case 'P': return [[9, 9], [9, 9], [9, 0]];
-    case 'X': return [[0, 10, 0], [10, 10, 10], [0, 10, 0]];
-    default: return [[1]];
+    case 'T':
+      return [[0, 0, 0], [1, 1, 1], [0, 1, 0]];
+    case 'O':
+      return [[2, 2], [2, 2]];
+    case 'L':
+      return [[0, 3, 0], [0, 3, 0], [0, 3, 3]];
+    case 'J':
+      return [[0, 4, 0], [0, 4, 0], [4, 4, 0]];
+    case 'I':
+      return [[0, 5, 0, 0], [0, 5, 0, 0], [0, 5, 0, 0], [0, 5, 0, 0]];
+    case 'S':
+      return [[0, 6, 6], [6, 6, 0], [0, 0, 0]];
+    case 'Z':
+      return [[7, 7, 0], [0, 7, 7], [0, 0, 0]];
+    case 'U':
+      return [[8, 0, 8], [8, 8, 8]];
+    case 'P':
+      return [[9, 9], [9, 9], [9, 0]];
+    case 'X':
+      return [[0, 10, 0], [10, 10, 10], [0, 10, 0]];
+    default:
+      return [[1]];
   }
-}
-
-function drawMatrix(matrix, offset) {
-  matrix.forEach((row, y) => {
-    row.forEach((value, x) => {
-      if (value) {
-        context.fillStyle = getColor(value);
-        context.fillRect(x + offset.x, y + offset.y, 1, 1);
-      }
-    });
-  });
 }
 
 function getColor(value) {
@@ -62,6 +61,17 @@ function getColor(value) {
     '#FF66C4', // 9 - P
     '#AA00FF'  // 10 - X
   ][value];
+}
+
+function drawMatrix(matrix, offset) {
+  matrix.forEach((row, y) => {
+    row.forEach((value, x) => {
+      if (value) {
+        context.fillStyle = getColor(value);
+        context.fillRect(x + offset.x, y + offset.y, 1, 1);
+      }
+    });
+  });
 }
 
 function draw() {
@@ -85,10 +95,9 @@ function collide(arena, player) {
   const [m, o] = [player.matrix, player.pos];
   for (let y = 0; y < m.length; ++y) {
     for (let x = 0; x < m[y].length; ++x) {
-      if (
-        m[y][x] &&
-        (arena[y + o.y] && arena[y + o.y][x + o.x]) !== 0
-      ) {
+      if (m[y][x] &&
+          (arena[y + o.y] &&
+           arena[y + o.y][x + o.x]) !== 0) {
         return true;
       }
     }
@@ -149,8 +158,11 @@ function rotate(matrix, dir) {
       [matrix[x][y], matrix[y][x]] = [matrix[y][x], matrix[x][y]];
     }
   }
-  if (dir > 0) matrix.forEach(row => row.reverse());
-  else matrix.reverse();
+  if (dir > 0) {
+    matrix.forEach(row => row.reverse());
+  } else {
+    matrix.reverse();
+  }
 }
 
 function arenaSweep() {
@@ -182,12 +194,6 @@ function update(time = 0) {
   requestAnimationFrame(update);
 }
 
-function startGame() {
-  playerReset();
-  updateScore();
-  update();
-}
-
 document.addEventListener('keydown', event => {
   if (event.key === 'ArrowLeft') playerMove(-1);
   else if (event.key === 'ArrowRight') playerMove(1);
@@ -196,42 +202,17 @@ document.addEventListener('keydown', event => {
   else if (event.key === 'w') playerRotate(1);
 });
 
-// SWIPE CONTROL MOBILE
-let touchStartX = 0;
-let touchStartY = 0;
-let moved = false;
+// Kontrol sentuh (khusus mobile)
+if ('ontouchstart' in window) {
+  document.getElementById('mobile-controls').style.display = 'flex';
 
-canvas.addEventListener('touchstart', e => {
-  const touch = e.touches[0];
-  touchStartX = touch.clientX;
-  touchStartY = touch.clientY;
-  moved = false;
-}, { passive: true });
+  document.getElementById('left').addEventListener('click', () => playerMove(-1));
+  document.getElementById('right').addEventListener('click', () => playerMove(1));
+  document.getElementById('rotate').addEventListener('click', () => playerRotate(1));
+  document.getElementById('down').addEventListener('click', () => playerDrop());
+}
 
-canvas.addEventListener('touchmove', e => {
-  moved = true;
-}, { passive: true });
-
-canvas.addEventListener('touchend', e => {
-  const touch = e.changedTouches[0];
-  const dx = touch.clientX - touchStartX;
-  const dy = touch.clientY - touchStartY;
-
-  const absX = Math.abs(dx);
-  const absY = Math.abs(dy);
-
-  if (!moved) {
-    // Tap = rotate
-    playerRotate(1);
-    return;
-  }
-
-  if (absX > absY) {
-    if (dx > 20) playerMove(1);
-    else if (dx < -20) playerMove(-1);
-  } else {
-    if (dy > 20) playerDrop();
-  }
-});
-
-startGame();
+// Start game
+playerReset();
+updateScore();
+update();
