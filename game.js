@@ -110,7 +110,13 @@ document.addEventListener('DOMContentLoaded', () => {
     for (let i = 0; i < shape.length; i++) {
       for (let j = 0; j < shape[i].length; j++) {
         if (shape[i][j]) {
-          const cellIndex = (y + i) * gridSize + (x + j);
+          const cellX = x + j;
+          const cellY = y + i;
+
+          // Cek apakah keluar dari grid
+          if (cellX >= gridSize || cellY >= gridSize) return false;
+
+          const cellIndex = cellY * gridSize + cellX;
           const cell = grid.children[cellIndex];
           if (!cell || cell.style.backgroundColor) return false;
         }
