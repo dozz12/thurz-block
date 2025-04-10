@@ -1,82 +1,91 @@
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@600&display=swap');
-
 body {
-  margin: 0;
-  background: radial-gradient(ellipse at center, #1a1a1a 0%, #000000 100%);
-  font-family: 'Orbitron', sans-serif;
-  color: #0ff;
+  font-family: 'Segoe UI', sans-serif;
+  background: linear-gradient(to right, #101820, #2c3e50);
+  color: #fff;
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh;
-  flex-direction: column;
+  min-height: 100vh;
+  margin: 0;
 }
 
-.title {
-  font-size: 3rem;
-  color: #00ffff;
-  text-shadow: 0 0 10px #00ffff;
-  margin-bottom: 10px;
+.container {
+  text-align: center;
 }
 
-#game-container {
+#score-board {
+  font-size: 1.2rem;
+  margin-bottom: 1rem;
+}
+
+#game-wrapper {
   display: flex;
+  gap: 20px;
   justify-content: center;
-  align-items: flex-start;
+  flex-wrap: wrap;
 }
 
-#grid {
+.grid {
   display: grid;
-  grid-template-rows: repeat(10, 30px);
   grid-template-columns: repeat(10, 30px);
+  grid-template-rows: repeat(10, 30px);
   gap: 2px;
-  background-color: #111;
+  background-color: #333;
   padding: 5px;
-  border: 4px solid #0ff;
-  box-shadow: 0 0 20px #0ff;
+  border-radius: 8px;
 }
 
 .cell {
   width: 30px;
   height: 30px;
-  background-color: #222;
+  background-color: #1e1e1e;
+  border-radius: 4px;
+  transition: background-color 0.2s;
 }
 
-#next-blocks {
-  margin-left: 20px;
+.cell.placed {
+  box-shadow: inset 0 0 5px rgba(255, 255, 255, 0.4);
+}
+
+.cell.clearing {
+  animation: flash 0.3s ease-in-out;
+}
+
+@keyframes flash {
+  0% { background-color: #fff; }
+  100% { background-color: #1e1e1e; }
+}
+
+.next-blocks {
   display: flex;
   flex-direction: column;
+  gap: 10px;
 }
 
 .next-block {
+  width: 120px;
+  height: 120px;
   display: grid;
-  grid-template-rows: repeat(4, 20px);
-  grid-template-columns: repeat(4, 20px);
-  gap: 2px;
-  margin-bottom: 10px;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(4, 1fr);
+  background-color: #222;
+  padding: 5px;
+  border-radius: 6px;
 }
 
 .next-cell {
-  width: 20px;
-  height: 20px;
-  background-color: #222;
+  width: 100%;
+  height: 100%;
+  border-radius: 4px;
 }
 
-.score-board {
-  margin-top: 15px;
-  font-size: 1.5rem;
-}
-
-#rotate-btn {
-  margin-top: 10px;
-  padding: 10px 20px;
-  font-size: 1rem;
-  background-color: #0ff;
-  border: none;
-  cursor: pointer;
-  border-radius: 5px;
-}
-
-#rotate-btn:hover {
-  background-color: #00cccc;
+.ghost-block {
+  position: absolute;
+  pointer-events: none;
+  width: 120px;
+  height: 120px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(4, 1fr);
+  z-index: 1000;
 }
