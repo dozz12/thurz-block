@@ -2,7 +2,7 @@ const canvas = document.getElementById('tetris');
 const context = canvas.getContext('2d');
 context.scale(20, 20);
 
-// Lebarin arena jadi 14x24
+// Arena 14x24
 const arena = createMatrix(14, 24);
 const player = {
   pos: { x: 0, y: 0 },
@@ -14,9 +14,10 @@ let dropCounter = 0;
 let dropInterval = 1000;
 let lastTime = 0;
 
-// Buat animasi flash
 let flashRows = [];
 let flashTime = 0;
+
+// ==== CREATE ====
 
 function createMatrix(w, h) {
   const matrix = [];
@@ -26,31 +27,28 @@ function createMatrix(w, h) {
 
 function createPiece(type) {
   switch (type) {
-    case 'T':
-      return [[0, 0, 0], [1, 1, 1], [0, 1, 0]];
-    case 'O':
-      return [[2, 2], [2, 2]];
-    case 'L':
-      return [[0, 3, 0], [0, 3, 0], [0, 3, 3]];
-    case 'J':
-      return [[0, 4, 0], [0, 4, 0], [4, 4, 0]];
-    case 'I':
-      return [[0, 5, 0, 0], [0, 5, 0, 0], [0, 5, 0, 0], [0, 5, 0, 0]];
-    case 'S':
-      return [[0, 6, 6], [6, 6, 0], [0, 0, 0]];
-    case 'Z':
-      return [[7, 7, 0], [0, 7, 7], [0, 0, 0]];
-    case 'U':
-      return [[8, 0, 8], [8, 8, 8]];
-    case 'P':
-      return [[9, 9], [9, 9], [9, 0]];
-    case 'X':
-      return [[0, 10, 0], [10, 10, 10], [0, 10, 0]];
-    case 'B': // Blok 3x3 super
-      return [[11, 11, 11], [11, 11, 11], [11, 11, 11]];
-    default:
-      return [[1]];
+    case 'T': return [[0, 0, 0], [1, 1, 1], [0, 1, 0]];
+    case 'O': return [[2, 2], [2, 2]];
+    case 'L': return [[0, 3, 0], [0, 3, 0], [0, 3, 3]];
+    case 'J': return [[0, 4, 0], [0, 4, 0], [4, 4, 0]];
+    case 'I': return [[0, 5, 0, 0], [0, 5, 0, 0], [0, 5, 0, 0], [0, 5, 0, 0]];
+    case 'S': return [[0, 6, 6], [6, 6, 0], [0, 0, 0]];
+    case 'Z': return [[7, 7, 0], [0, 7, 7], [0, 0, 0]];
+    case 'U': return [[8, 0, 8], [8, 8, 8]];
+    case 'P': return [[9, 9], [9, 9], [9, 0]];
+    case 'X': return [[0, 10, 0], [10, 10, 10], [0, 10, 0]];
+    case 'B': return [[11, 11, 11], [11, 11, 11], [11, 11, 11]];
   }
+}
+
+// ==== DRAW ====
+
+function getColor(value) {
+  return [
+    '#000000', '#FF0D72', '#0DC2FF', '#0DFF72', '#F538FF',
+    '#FF8E0D', '#FFE138', '#3877FF', '#00FFA3', '#FF66C4',
+    '#AA00FF', '#FF3CAC'
+  ][value];
 }
 
 function drawMatrix(matrix, offset) {
@@ -64,23 +62,6 @@ function drawMatrix(matrix, offset) {
   });
 }
 
-function getColor(value) {
-  return [
-    '#000000', // 0 - kosong
-    '#FF0D72', // 1 - T
-    '#0DC2FF', // 2 - O
-    '#0DFF72', // 3 - L
-    '#F538FF', // 4 - J
-    '#FF8E0D', // 5 - I
-    '#FFE138', // 6 - S
-    '#3877FF', // 7 - Z
-    '#00FFA3', // 8 - U
-    '#FF66C4', // 9 - P
-    '#AA00FF', // 10 - X
-    '#FF3CAC'  // 11 - B (Big block)
-  ][value];
-}
-
 function draw() {
   context.fillStyle = '#111';
   context.fillRect(0, 0, canvas.width, canvas.height);
@@ -88,10 +69,10 @@ function draw() {
   drawMatrix(arena, { x: 0, y: 0 });
   drawMatrix(player.matrix, player.pos);
 
-  // Flash effect
+  // Flash animation
   if (flashTime > 0) {
     flashRows.forEach(y => {
-      context.fillStyle = 'rgba(255, 255, 255, 0.5)';
+      context.fillStyle = 'rgba(255,255,255,0.5)';
       context.fillRect(0, y, arena[0].length, 1);
     });
     flashTime -= 16;
@@ -99,22 +80,16 @@ function draw() {
   }
 }
 
+// ==== LOGIC ====
+
 function merge(arena, player) {
   player.matrix.forEach((row, y) => {
     row.forEach((value, x) => {
       if (value) {
-        const realY = y + player.pos.y;
-        const realX = x + player.pos.x;
-
-        if (value === 11) {
-          // Super block: hancurkan baris walau gak full
-          if (arena[realY]) {
-            arena[realY] = new Array(arena[0].length).fill(0);
-            flashRows.push(realY);
-            flashTime = 200;
-          }
-        } else {
-          arena[realY][realX] = value;
+        const ay = y + player.pos.y;
+        const ax = x + player.pos.x;
+        if (arena[ay] && arena[ay][ax] !== undefined) {
+          arena[ay][ax] = value;
         }
       }
     });
@@ -122,10 +97,11 @@ function merge(arena, player) {
 }
 
 function collide(arena, player) {
-  const [m, o] = [player.matrix, player.pos];
+  const m = player.matrix;
+  const o = player.pos;
   for (let y = 0; y < m.length; ++y) {
     for (let x = 0; x < m[y].length; ++x) {
-      if (m[y][x] &&
+      if (m[y][x] !== 0 &&
           (arena[y + o.y] &&
            arena[y + o.y][x + o.x]) !== 0) {
         return true;
@@ -135,13 +111,23 @@ function collide(arena, player) {
   return false;
 }
 
+function rotate(matrix, dir) {
+  for (let y = 0; y < matrix.length; ++y) {
+    for (let x = 0; x < y; ++x) {
+      [matrix[x][y], matrix[y][x]] = [matrix[y][x], matrix[x][y]];
+    }
+  }
+  if (dir > 0) matrix.forEach(row => row.reverse());
+  else matrix.reverse();
+}
+
 function playerDrop() {
   player.pos.y++;
   if (collide(arena, player)) {
     player.pos.y--;
     merge(arena, player);
-    playerReset();
     arenaSweep();
+    playerReset();
     updateScore();
   }
   dropCounter = 0;
@@ -151,18 +137,6 @@ function playerMove(dir) {
   player.pos.x += dir;
   if (collide(arena, player)) {
     player.pos.x -= dir;
-  }
-}
-
-function playerReset() {
-  const pieces = 'TJLOSZIUPXB'; // Tambah B untuk super block
-  player.matrix = createPiece(pieces[Math.floor(Math.random() * pieces.length)]);
-  player.pos.y = 0;
-  player.pos.x = Math.floor(arena[0].length / 2) - Math.floor(player.matrix[0].length / 2);
-  if (collide(arena, player)) {
-    arena.forEach(row => row.fill(0));
-    player.score = 0;
-    updateScore();
   }
 }
 
@@ -181,14 +155,17 @@ function playerRotate(dir) {
   }
 }
 
-function rotate(matrix, dir) {
-  for (let y = 0; y < matrix.length; ++y) {
-    for (let x = 0; x < y; ++x) {
-      [matrix[x][y], matrix[y][x]] = [matrix[y][x], matrix[x][y]];
-    }
+function playerReset() {
+  const pieces = 'TJLOSZIUPXB';
+  player.matrix = createPiece(pieces[Math.floor(Math.random() * pieces.length)]);
+  player.pos.y = 0;
+  player.pos.x = Math.floor(arena[0].length / 2) - Math.floor(player.matrix[0].length / 2);
+
+  if (collide(arena, player)) {
+    arena.forEach(row => row.fill(0));
+    player.score = 0;
+    updateScore();
   }
-  if (dir > 0) matrix.forEach(row => row.reverse());
-  else matrix.reverse();
 }
 
 function arenaSweep() {
@@ -197,35 +174,37 @@ function arenaSweep() {
     for (let x = 0; x < arena[y].length; ++x) {
       if (arena[y][x] === 0) continue outer;
     }
-    flashRows.push(y);
+
+    const hasSuperBlock = arena[y].includes(11);
     const row = arena.splice(y, 1)[0].fill(0);
     arena.unshift(row);
-    ++y;
-    player.score += rowCount * 10;
-    rowCount *= 2;
+    flashRows.push(y);
     flashTime = 200;
+
+    // Bonus skor kalau ada B
+    player.score += rowCount * (hasSuperBlock ? 50 : 10);
+    rowCount *= 2;
+    ++y;
   }
 }
 
-function updateScore() {
-  document.getElementById('score').innerText = player.score;
-}
+// ==== LOOP ====
 
 function update(time = 0) {
   const deltaTime = time - lastTime;
   lastTime = time;
   dropCounter += deltaTime;
+
   if (dropCounter > dropInterval) {
     playerDrop();
   }
+
   draw();
   requestAnimationFrame(update);
 }
 
-function startGame() {
-  playerReset();
-  updateScore();
-  update();
+function updateScore() {
+  document.getElementById('score').innerText = player.score;
 }
 
 document.addEventListener('keydown', event => {
@@ -235,3 +214,9 @@ document.addEventListener('keydown', event => {
   else if (event.key === 'q') playerRotate(-1);
   else if (event.key === 'w') playerRotate(1);
 });
+
+// ==== START ====
+
+playerReset();
+updateScore();
+update();
