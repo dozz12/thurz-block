@@ -1,74 +1,70 @@
-* {
-  box-sizing: border-box;
+body {
+  background-color: #1a1a1a;
+  color: #fff;
+  font-family: 'Arial', sans-serif;
+  text-align: center;
   margin: 0;
   padding: 0;
 }
 
-body {
-  background-color: #000;
-  color: #fff;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-  min-height: 100vh;
-  padding: 20px;
-}
-
 h1 {
-  margin-bottom: 10px;
+  margin-top: 20px;
   font-size: 2em;
   color: #0DC2FF;
-  text-shadow: 0 0 10px #0DC2FF;
 }
 
 canvas {
-  border: 3px solid #0DC2FF;
-  background: #111;
-  width: 100%;
-  max-width: 320px;
-  height: auto;
-  touch-action: none;
+  display: block;
+  margin: 20px auto;
+  background-color: #111;
+  border: 2px solid #0DC2FF;
 }
 
 #score {
-  margin-top: 15px;
   font-size: 1.5em;
-  color: #fff;
   font-weight: bold;
+  margin-bottom: 10px;
 }
 
-#mobile-controls {
-  display: none;
-  margin-top: 20px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  justify-content: center;
-}
-
-#mobile-controls button {
-  font-size: 24px;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 8px;
+#startBtn {
+  margin: 20px auto;
+  padding: 12px 24px;
+  font-size: 1.2em;
+  font-weight: bold;
   background-color: #0DC2FF;
   color: #000;
-  font-weight: bold;
+  border: none;
+  border-radius: 8px;
   cursor: pointer;
   box-shadow: 0 4px #055c73;
-  transition: 0.1s;
+  transition: 0.1s ease-in-out;
 }
 
-#mobile-controls button:active {
+#startBtn:active {
   transform: translateY(2px);
   box-shadow: 0 2px #055c73;
 }
 
-.footer {
-  margin-top: auto;
+#mobile-controls {
+  display: none;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+#mobile-controls button {
+  font-size: 1.5em;
+  padding: 10px 20px;
+  border: none;
+  background-color: #0DC2FF;
+  color: #000;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+footer {
+  margin-top: 30px;
   font-size: 0.9em;
-  color: #666;
-  padding-top: 20px;
+  color: #888;
 }
