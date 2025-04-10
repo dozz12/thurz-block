@@ -1,20 +1,21 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>ThurZ Block</title>
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <h1 class="title">ThurZ Block</h1>
-  <div id="game-container">
-    <div id="grid"></div>
-    <div id="next-blocks"></div>
+  <div class="container">
+    <h1>ThurZ Block</h1>
+    <div id="score-board">Score: <span id="score">0</span></div>
+    <div id="game-wrapper">
+      <div id="grid" class="grid"></div>
+      <div id="next-blocks" class="next-blocks"></div>
+    </div>
   </div>
-  <div class="score-board">Skor: <span id="score">0</span></div>
-  <button id="rotate-btn">Putar Blok</button>
 
-  <script src="game.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
